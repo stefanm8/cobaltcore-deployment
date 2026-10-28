@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: git://host.minikube.internal:19418/cobaltcore-deployment/.git
+    repoURL: http://host.minikube.internal:19418/cobaltcore-deployment.git
     targetRevision: main
     path: bootstrap/argocd/stack
   destination:

@@ -14,7 +14,7 @@ bootstrap/argocd/       alternative Argo CD entry point
 scripts/                local controller/source bootstrap helpers
 ```
 
-Install Docker, minikube, kubectl and Git, commit this repository on `main`, then:
+Install Docker, minikube, kubectl, Python 3 and Git, commit this repository on `main`, then:
 
 ```bash
 bash scripts/bootstrap-minikube.sh
@@ -25,7 +25,7 @@ kubectl --context=cobaltcore -n openstack get controlplane
 The script bootstraps the controller and its Git source. Flux reconciles the
 entire stack, including the OpenBao initialization and database-onboarding Jobs.
 Commit changes on `main` to deploy them; an uncommitted working-tree edit has no
-effect. The local Git daemon exports only this repository, read-only, on
+effect. The local Git HTTP server exports only this repository, read-only, on
 localhost:19418. Minikube on OrbStack reaches it through `host.minikube.internal`.
 If using a different driver, verify that hostname reaches the host first, or
 change `bootstrap/source/source.yaml` to an HTTPS/SSH Git remote.
@@ -62,4 +62,4 @@ GitRepository URL together when moving this repository to a remote host.
 
 Stateful stages intentionally use `prune: false`; deleting the root is not a
 stack teardown. A minikube profile deletion destroys its local data. Stop the
-local source daemon using the PID in `.local/git-daemon.pid` when finished.
+local source daemon using the PID in `.local/git-source.pid` when finished.
