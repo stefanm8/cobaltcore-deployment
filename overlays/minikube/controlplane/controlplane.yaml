@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: Copyright 2026 SAP SE or an SAP affiliate company
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Local single-node ControlPlane and gateway endpoints.
+apiVersion: c5c3.io/v1alpha1
+kind: ControlPlane
+metadata:
+  name: controlplane
+  namespace: openstack
+spec:
+  openStackRelease: '2026.1'
+  services:
+    keystone:
+      gateway:
+        parentRef:
+          name: openstack-gw
+        hostname: keystone.127-0-0-1.nip.io
+        path: /
+    horizon:
+      gateway:
+        parentRef:
+          name: openstack-gw
+        hostname: horizon.127-0-0-1.nip.io
+  sizing:
+    profile: Minimal

@@ -6,7 +6,7 @@ pinned by commit in `bases/*/kustomization.yaml`.
 
 ```
 bases/                  pinned references to the fork's reusable bundles
-overlays/minikube/       local sizing, storage, endpoint and version settings
+overlays/minikube/       cluster resources, bootstrap Jobs and local settings
 clusters/minikube/       Flux dependency graph and readiness gates
 bootstrap/runtime/      one-time Flux operator and controller installation
 bootstrap/flux/         Git source + root reconciliation
@@ -33,6 +33,14 @@ The profile deploys the CobaltCore operators plus a Minimal Keystone/Horizon
 ControlPlane. It uses development certificates and stores local OpenBao init
 keys in a Kubernetes Secret. It does not provision hypervisors, Ceph, or VMs.
 Do not use the development bootstrap Jobs in a production overlay.
+
+This repository owns the ControlPlane instance, Envoy Gateway and its CRDs,
+public certificates, Horizon secret mapping, OpenBao bootstrap/unseal Jobs and
+database onboarding. Their manifests live under `overlays/minikube/`. The fork
+provides reusable operator/infrastructure bases and canonical bootstrap scripts
+and policies; all cluster assumptions remain here. The OpenBao bootstrap targets
+`shared-services/openbao-0` and tenant `openstack/controlplane`, and its CronJob
+unseals the local server after restarts using Kubernetes-custodied init keys.
 
 Chart versions and operator image digests live in each overlay's `versions.yaml`;
 service image digests live in the ControlPlane patch. To upgrade, edit these pins
