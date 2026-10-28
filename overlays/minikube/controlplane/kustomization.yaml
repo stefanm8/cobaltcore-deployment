@@ -7,4 +7,7 @@ patches:
     kind: ControlPlane
     name: controlplane
   patch: "apiVersion: c5c3.io/v1alpha1\nkind: ControlPlane\nmetadata:\n  name: patch-target\n\
-    spec:\n  services:\n    keystone:\n      publicEndpoint: https://keystone.127-0-0-1.nip.io:8443/v3\n"
+    spec:\n  services:\n    keystone:\n      publicEndpoint: https://keystone.127-0-0-1.nip.io:8443/v3\n\
+    \      image:\n        repository: ghcr.io/c5c3/keystone\n        digest: sha256:88bb59a02f72286275e0c79898adecb18087223f08b5cc303b020396b928f5ea\n\
+    \    horizon:\n      image:\n        repository: ghcr.io/c5c3/horizon\n      \
+    \  digest: sha256:d886da85fcad3f73864d4702c8fc22aa4188608dd07bd0ad119a83b2e4152fce\n"

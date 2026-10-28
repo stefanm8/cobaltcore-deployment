@@ -13,3 +13,48 @@ patches:
     name: memcached-operator
   patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
     \ patch-target\nspec:\n  values:\n    webhook:\n      enabled: false\n"
+- target:
+    kind: HelmRelease
+    name: keystone-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ keystone-operator\nspec:\n  values:\n    image:\n      digest: sha256:3d78a3a50645883b59dad535952826e8bbb01dfcda5367bcf9e69a2e85c7daef\n"
+- target:
+    kind: HelmRelease
+    name: horizon-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ horizon-operator\nspec:\n  values:\n    image:\n      digest: sha256:c73ab85a3705ef2450c25b94d016bff6fa7a856eef202ea6e19d6f43faf155a8\n"
+- target:
+    kind: HelmRelease
+    name: glance-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ glance-operator\nspec:\n  values:\n    image:\n      digest: sha256:5fad19f901d8082a61a788d914302cefc1c927bdb68842e1b8dc8614692d9764\n"
+- target:
+    kind: HelmRelease
+    name: placement-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ placement-operator\nspec:\n  values:\n    image:\n      digest: sha256:d37b593af577b37fa3903f81f53571e629c580a0a0f24f9f26b0c10f26e3625e\n"
+- target:
+    kind: HelmRelease
+    name: barbican-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ barbican-operator\nspec:\n  values:\n    image:\n      digest: sha256:3e55aa1cfdf573e80c15d3f5f0daba68df710393969d11c4d1c138d4a79ebc7c\n"
+- target:
+    kind: HelmRelease
+    name: ovn-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ ovn-operator\nspec:\n  values:\n    image:\n      digest: sha256:76efb0af05a14580bd5fa7c8ab39f9b5ffc745ca75ec4647c5dcbb109585cc0f\n"
+- target:
+    kind: HelmRelease
+    name: neutron-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ neutron-operator\nspec:\n  values:\n    image:\n      digest: sha256:393ef89033aaad6c9f195062f09c1df911a14ab82cce248df131566187dd52c6\n"
+- target:
+    kind: HelmRelease
+    name: cinder-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ cinder-operator\nspec:\n  values:\n    image:\n      digest: sha256:f8342b475c88fec82c932bc811136b9f618edb621182781027a22e7c44ac62c8\n"
+- target:
+    kind: HelmRelease
+    name: nova-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ nova-operator\nspec:\n  values:\n    image:\n      digest: sha256:4a06db3f5c1f8f6d03f5225983568420a644904b8790543b5fc6258e99bcda60\n"
