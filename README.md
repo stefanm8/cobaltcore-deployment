@@ -10,7 +10,6 @@ overlays/minikube/       local sizing, storage, endpoint and version settings
 clusters/minikube/       Flux dependency graph and readiness gates
 bootstrap/runtime/      one-time Flux operator and controller installation
 bootstrap/flux/         Git source + root reconciliation
-bootstrap/argocd/       alternative Argo CD entry point
 scripts/                local controller/source bootstrap helpers
 ```
 
@@ -60,13 +59,6 @@ exception. The Keystone endpoint is
 kubectl --context=cobaltcore -n openstack get secret controlplane-keystone-admin-credentials \
   -o jsonpath='{.data.password}' | base64 -d
 ```
-
-For Argo CD, install `bootstrap/runtime` in the same two stages as the script,
-then apply `bootstrap/argocd/application.yaml` to an existing Argo CD instance.
-The Application owns the stage declarations; Flux remains the Helm and stage
-execution engine. Choose this **instead of** `bootstrap/flux`: never have both
-root controllers own the same stage declarations. Adjust `repoURL` and the Flux
-GitRepository URL together when moving this repository to a remote host.
 
 Stateful stages intentionally use `prune: false`; deleting the root is not a
 stack teardown. A minikube profile deletion destroys its local data. Stop the
