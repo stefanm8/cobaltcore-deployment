@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- ../../../bases/controlplane-operator
+- https://github.com/stefanm8/cobaltcore//deploy/gitops/bases/controlplane-operator?ref=7040f33b003cce68ef9e738ea485b765532967c3
 patches:
 - target:
     kind: HelmRelease

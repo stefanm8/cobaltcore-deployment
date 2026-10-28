@@ -10,6 +10,6 @@ spec:
   sourceRef:
     kind: GitRepository
     name: cobaltcore-deployment
-  path: ./clusters/minikube
+  path: ./overlays/minikube
   prune: true
   wait: false

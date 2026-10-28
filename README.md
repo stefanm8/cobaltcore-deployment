@@ -1,17 +1,23 @@
 # CobaltCore deployment
 
 Environment repository for the local `cobaltcore` minikube profile. Reusable
-bases come from the clean `feat/gitops-deployment` branch of the CobaltCore fork,
-pinned by commit in `bases/*/kustomization.yaml`.
+bundles come from the clean `feat/gitops-deployment` branch of the CobaltCore fork,
+referenced directly by commit in each stage's `kustomization.yaml`.
 
 ```
-bases/                  pinned references to the fork's reusable bundles
-overlays/minikube/       cluster resources, bootstrap Jobs and local settings
-clusters/minikube/       Flux dependency graph and readiness gates
+overlays/minikube/       single environment entry point and stage definitions
+overlays/minikube/*/     stage resources, settings and direct fork references
 bootstrap/runtime/      one-time Flux operator and controller installation
 bootstrap/flux/         Git source + root reconciliation
 scripts/                controller bootstrap and version-lock helpers
 ```
+
+`overlays/minikube/kustomization.yaml` assembles the whole environment: Flux's
+runtime and source/root configuration, plus `stack.yaml` with the stage
+definitions. Flux watches this directory. Each stage builds its own subdirectory
+and waits for its declared dependencies; this preserves readiness ordering for
+operators, certificates, secrets and databases. There is no separate local base
+wrapper layer. The root manages its own Flux configuration after initial bootstrap.
 
 Install Docker, minikube, kubectl and Git, clone this repository, then:
 
@@ -43,7 +49,7 @@ unseals the local server after restarts using Kubernetes-custodied init keys.
 
 Chart versions and operator image digests live in each overlay's `versions.yaml`;
 service image digests live in the ControlPlane patch. To upgrade, edit these pins
-and the fork commit references under `bases/`, render the affected overlays with
+and the fork commit references under `overlays/minikube/`, render the affected stages with
 `kustomize build`, then commit. Helm drift detection restores changes made outside
 Git. The optional `scripts/lock-versions.py` records versions from a healthy local
 installation; install its Python dependency from `scripts/requirements.txt` in a
@@ -52,7 +58,7 @@ virtual environment before running it.
 ## Testing a fork commit
 
 Push the changes to `stefanm8/cobaltcore` on `feat/gitops-deployment`. Copy the full
-commit SHA from that branch, then update all seven fork references from this
+commit SHA from that branch, then update the direct fork references from this
 deployment repository's root (requires Python 3 and Kustomize):
 
 ```bash
@@ -62,16 +68,20 @@ python3 - <<'PY'
 import os, pathlib, re
 sha = os.environ['FORK_SHA']
 assert re.fullmatch(r'[0-9a-f]{40}', sha), 'Use a full commit SHA'
-for path in pathlib.Path('bases').glob('*/kustomization.yaml'):
-    path.write_text(re.sub(r'(?<=ref=)[0-9a-f]{40}', sha, path.read_text()))
+for path in pathlib.Path('overlays/minikube').rglob('kustomization.yaml'):
+    path.write_text(re.sub(
+        r'(https://github.com/stefanm8/cobaltcore//[^\s?]+\?ref=)[0-9a-f]{40}',
+        lambda match: match[1] + sha, path.read_text()))
 PY
 (
   set -e
+  kustomize build overlays/minikube > /dev/null
   for overlay in overlays/minikube/*; do
+    [ -d "$overlay" ] || continue
     kustomize build "$overlay" > /dev/null
   done
 )
-git diff -- bases
+git diff -- overlays/minikube
 ```
 
 After every overlay renders successfully, commit the reviewed pin changes and
