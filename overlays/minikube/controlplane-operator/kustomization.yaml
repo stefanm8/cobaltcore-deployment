@@ -11,10 +11,6 @@ patches:
     \      retries: 3\n"
 - target:
     kind: HelmRelease
-    name: c5c3-operator
-  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
-    \ c5c3-operator\nspec:\n  values:\n    image:\n      digest: sha256:57361a2f0b8cf0f8b17d444e71c67f86cf2938c5bd20fe0d52da8e3c2d56f882\n"
-- target:
-    kind: HelmRelease
   patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
     \ patch-target\nspec:\n  driftDetection:\n    mode: enabled\n  interval: 5m\n"
+- path: versions.yaml
