@@ -61,7 +61,7 @@ patches:
 - target:
     kind: GitRepository
   patch: "apiVersion: source.toolkit.fluxcd.io/v1\nkind: GitRepository\nmetadata:\n\
-    \  name: patch-target\nspec:\n  timeout: 5m\n"
+    \  name: patch-target\nspec:\n  timeout: 5m\n  ref:\n    branch: main\n"
 - target:
     kind: HelmRelease
   patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
