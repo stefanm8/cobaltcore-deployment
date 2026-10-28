@@ -10,10 +10,10 @@ overlays/minikube/       cluster resources, bootstrap Jobs and local settings
 clusters/minikube/       Flux dependency graph and readiness gates
 bootstrap/runtime/      one-time Flux operator and controller installation
 bootstrap/flux/         Git source + root reconciliation
-scripts/                local controller/source bootstrap helpers
+scripts/                controller bootstrap and version-lock helpers
 ```
 
-Install Docker, minikube, kubectl, Python 3 and Git, commit this repository on `main`, then:
+Install Docker, minikube, kubectl and Git, clone this repository, then:
 
 ```bash
 bash scripts/bootstrap-minikube.sh
@@ -23,11 +23,10 @@ kubectl --context=cobaltcore -n openstack get controlplane
 
 The script bootstraps the controller and its Git source. Flux reconciles the
 entire stack, including the OpenBao initialization and database-onboarding Jobs.
-Commit changes on `main` to deploy them; an uncommitted working-tree edit has no
-effect. The local Git HTTP server exports only this repository, read-only, on
-localhost:19418. Minikube on OrbStack reaches it through `host.minikube.internal`.
-If using a different driver, verify that hostname reaches the host first, or
-change `bootstrap/source/source.yaml` to an HTTPS/SSH Git remote.
+Push changes to this repository's `main` branch to deploy them. Flux reads the
+public GitHub repository over HTTPS every 30 seconds; local edits and unpushed
+commits have no effect. The workstation's Git remote uses SSH for pushes. No
+GitHub credentials are required inside the cluster for this public repository.
 
 The profile deploys the CobaltCore operators plus a Minimal Keystone/Horizon
 ControlPlane. It uses development certificates and stores local OpenBao init
@@ -50,6 +49,47 @@ Git. The optional `scripts/lock-versions.py` records versions from a healthy loc
 installation; install its Python dependency from `scripts/requirements.txt` in a
 virtual environment before running it.
 
+## Testing a fork commit
+
+Push the changes to `stefanm8/cobaltcore` on `feat/gitops-deployment`. Copy the full
+commit SHA from that branch, then update all seven fork references from this
+deployment repository's root (requires Python 3 and Kustomize):
+
+```bash
+git ls-remote git@github.com:stefanm8/cobaltcore.git refs/heads/feat/gitops-deployment
+export FORK_SHA=FULL_COMMIT_SHA
+python3 - <<'PY'
+import os, pathlib, re
+sha = os.environ['FORK_SHA']
+assert re.fullmatch(r'[0-9a-f]{40}', sha), 'Use a full commit SHA'
+for path in pathlib.Path('bases').glob('*/kustomization.yaml'):
+    path.write_text(re.sub(r'(?<=ref=)[0-9a-f]{40}', sha, path.read_text()))
+PY
+(
+  set -e
+  for overlay in overlays/minikube/*; do
+    kustomize build "$overlay" > /dev/null
+  done
+)
+git diff -- bases
+```
+
+After every overlay renders successfully, commit the reviewed pin changes and
+push `main`. Watch the GitRepository and Kustomizations until their applied
+revision matches the **deployment** commit, then check the ControlPlane:
+
+```bash
+kubectl --context=cobaltcore -n flux-system get gitrepositories,kustomizations
+kubectl --context=cobaltcore get helmreleases -A
+kubectl --context=cobaltcore -n openstack get controlplane
+```
+
+This tests manifests from the fork commit. Operator or application code changes
+also require publishing their images/charts and updating the overlay's image
+digests/chart versions. Validate Keystone authentication and Horizon after those
+changes. Revert the deployment pin/version commit and push to restore the prior
+configuration; application/data migrations may need their own rollback procedure.
+
 Access the local gateway in a separate terminal:
 
 ```bash
@@ -69,5 +109,4 @@ kubectl --context=cobaltcore -n openstack get secret controlplane-keystone-admin
 ```
 
 Stateful stages intentionally use `prune: false`; deleting the root is not a
-stack teardown. A minikube profile deletion destroys its local data. Stop the
-local source daemon using the PID in `.local/git-source.pid` when finished.
+stack teardown. A minikube profile deletion destroys its local data.
