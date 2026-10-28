@@ -1,0 +1,196 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-operators
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/operators
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-gateway-crds
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-tls
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/tls
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-operators
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-openbao
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/openbao
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-tls
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-controlplane-operator
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/controlplane-operator
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-operators
+  - name: cobaltcore-dev-bootstrap
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-controlplane
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/controlplane
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: false
+  dependsOn:
+  - name: cobaltcore-controlplane-operator
+  - name: cobaltcore-secrets
+  - name: cobaltcore-gateway
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-secrets
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/secrets
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-dev-bootstrap
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-gateway
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/gateway
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-operators
+  - name: cobaltcore-tls
+  healthCheckExprs:
+  - apiVersion: gateway.networking.k8s.io/v1
+    kind: Gateway
+    current: has(status) && has(status.conditions) && status.conditions.exists(c,
+      c.type == 'Programmed' && c.status == 'True')
+    failed: has(status) && has(status.conditions) && status.conditions.exists(c, c.type
+      == 'Accepted' && c.status == 'False')
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-gateway-crds
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/gateway-crds
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-dev-bootstrap
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/dev-bootstrap
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  wait: true
+  dependsOn:
+  - name: cobaltcore-openbao
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: cobaltcore-database-onboarding
+  namespace: flux-system
+spec:
+  interval: 5m
+  retryInterval: 30s
+  timeout: 15m
+  path: ./overlays/minikube/database-onboarding
+  prune: false
+  sourceRef:
+    kind: GitRepository
+    name: cobaltcore-deployment
+  dependsOn:
+  - name: cobaltcore-controlplane
+  healthChecks:
+  - apiVersion: batch/v1
+    kind: Job
+    name: cobaltcore-database-onboarding
+    namespace: shared-services
+  - apiVersion: c5c3.io/v1alpha1
+    kind: ControlPlane
+    name: controlplane
+    namespace: openstack

@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../../bases/controlplane-operator
+patches:
+- target:
+    kind: HelmRelease
+    name: c5c3-operator
+  patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
+    \ patch-target\nspec:\n  values:\n    replicas: 1\n  install:\n    remediation:\n\
+    \      retries: 3\n"

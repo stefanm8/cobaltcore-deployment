@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: cobaltcore-deployment
+  namespace: flux-system
+spec:
+  interval: 30s
+  url: git://host.minikube.internal:19418/cobaltcore-deployment
+  ref:
+    branch: main
