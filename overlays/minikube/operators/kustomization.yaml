@@ -58,3 +58,7 @@ patches:
     name: nova-operator
   patch: "apiVersion: helm.toolkit.fluxcd.io/v2\nkind: HelmRelease\nmetadata:\n  name:\
     \ nova-operator\nspec:\n  values:\n    image:\n      digest: sha256:4a06db3f5c1f8f6d03f5225983568420a644904b8790543b5fc6258e99bcda60\n"
+- target:
+    kind: GitRepository
+  patch: "apiVersion: source.toolkit.fluxcd.io/v1\nkind: GitRepository\nmetadata:\n\
+    \  name: patch-target\nspec:\n  timeout: 5m\n"
