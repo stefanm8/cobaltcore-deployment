@@ -35,6 +35,14 @@ ControlPlane. It uses development certificates and stores local OpenBao init
 keys in a Kubernetes Secret. It does not provision hypervisors, Ceph, or VMs.
 Do not use the development bootstrap Jobs in a production overlay.
 
+Chart versions and operator image digests live in each overlay's `versions.yaml`;
+service image digests live in the ControlPlane patch. To upgrade, edit these pins
+and the fork commit references under `bases/`, render the affected overlays with
+`kustomize build`, then commit. Helm drift detection restores changes made outside
+Git. The optional `scripts/lock-versions.py` records versions from a healthy local
+installation; install its Python dependency from `scripts/requirements.txt` in a
+virtual environment before running it.
+
 Access the local gateway in a separate terminal:
 
 ```bash
