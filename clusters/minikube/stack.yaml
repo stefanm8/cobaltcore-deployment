@@ -130,9 +130,9 @@ spec:
   healthCheckExprs:
   - apiVersion: gateway.networking.k8s.io/v1
     kind: Gateway
-    current: has(status) && has(status.conditions) && status.conditions.exists(c,
+    current: has(status.conditions) && status.conditions.exists(c,
       c.type == 'Programmed' && c.status == 'True')
-    failed: has(status) && has(status.conditions) && status.conditions.exists(c, c.type
+    failed: has(status.conditions) && status.conditions.exists(c, c.type
       == 'Accepted' && c.status == 'False')
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
